@@ -1,15 +1,15 @@
-# Reddit Trend Analysis
-Real time sentiment analysis pipeline for Reddit data using Kafka streaming, MongoDB storage, and interactive dashboards.
+# Reddit Trend Analysis (Local Deployment)
+Real-time sentiment analysis pipeline for Reddit data using locally deployed Kafka via Docker, MongoDB storage, and interactive dashboards.
 
 ## Table of Contents
 - [Project Goal](#project-goal)
-- [Architecture](#architecture)
 - [Live Dashboard](#live-dashboard)
 - [Requirements](#requirements)
 - [Setup Instructions](#setup-instructions)
 - [Running the Pipeline](#running-the-pipeline)
 - [Methodology](#methodology)
-- [Automation](#automation)
+- [Project Structure](#project-structure)
+- [Docker Commands](#docker-commands)
 - [Troubleshooting](#troubleshooting)
 - [Future Enhancements](#future-enhancements)
 
@@ -17,13 +17,10 @@ Real time sentiment analysis pipeline for Reddit data using Kafka streaming, Mon
 
 This project builds an end-to-end data pipeline that:
 - Fetches Reddit posts and comments in real-time from multiple subreddits
-- Streams data through Apache Kafka for distributed processing
-- Performs dual sentiment analysis using NLTK VADER and Transformer models
+- Streams data through locally deployed Apache Kafka using Docker
+- Performs sentiment analysis using NLTK VADER
 - Stores processed data in MongoDB with automatic indexing
 - Visualizes trends through an interactive Streamlit dashboard with live search capabilities
-
-## Architecture
-![Architecture Diagram](architecture.png)
 
 ## Live Dashboard
 **Access the dashboard here:** (https://reddit-trend-analysis.streamlit.app/)
@@ -32,35 +29,23 @@ No installation required! View real-time Reddit sentiment analysis directly in y
 
 ## Requirements
 
-> **Note:** These requirements are only needed if you want to run the data pipeline locally. The dashboard is publicly accessible via the link above.
-
 ### Software
 - Python 3.10+
-- MongoDB Atlas account
-- Confluent Cloud Kafka account
+- Docker Desktop
+- MongoDB Atlas account and get credentials
 - Reddit API credentials
 
-### Python Dependencies
-```bash
-pip install -r requirements.txt
-```
-
 ## Setup Instructions
-
-> **For developers only:** Follow these steps to run the complete pipeline locally.
 
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/Basim592003/Reddit-Trend-Analysis.git
 cd Reddit-Trend-Analysis
+git checkout ApacheKafka  # Switch to local deployment branch
 ```
 
-### 2. Create Virtual Environment
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
+### 2. Install Docker Desktop
+Download and install from [docker.com](https://www.docker.com/products/docker-desktop/)
 
 ### 3. Configure Environment Variables
 Create `.env` file in root directory:
@@ -69,40 +54,30 @@ REDDIT_CLIENT_ID=your_client_id
 REDDIT_CLIENT_SECRET=your_client_secret
 REDDIT_USER_AGENT=your_user_agent
 
-KAFKA_BOOTSTRAP_SERVERS=your_kafka_server
-KAFKA_API_KEY=your_api_key
-KAFKA_API_SECRET=your_api_secret
+KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
 MONGO_CONNECTION_STRING=your_mongo_connection_string
 ```
 
 ### 4. Configure Subreddits
-Edit `config.yaml` to specify subreddits to monitor:
+Edit `producer/config.yaml` to specify subreddits to monitor:
 ```yaml
 subreddits:
   - technology
   - news
   - worldnews
+batch_size: 3
+posts_per_subreddit: 10
+comments_per_post: 5
+cycle_delay: 300
 ```
 
-## Running the Pipeline
-
-**Step 1: Start Producer**
+## Run Everything with Docker
 ```bash
-cd producer
-python reddit_producer.py
+docker-compose up -d
 ```
+This starts Kafka, producer, and consumer all together.
 
-**Step 2: Start Consumer**
-```bash
-cd consumer
-python reddit_consumer.py
-```
-
-**Step 3: Launch Dashboard Locally**
-```bash
-streamlit run dashboard.py
-```
 ## Methodology
 
 ### Data Collection
@@ -111,7 +86,7 @@ streamlit run dashboard.py
 - Data serialized to JSON and published to Kafka topics
 
 ### Stream Processing
-- Confluent Kafka handles message queuing with SASL_SSL security
+- Apache Kafka runs locally via Docker (KRaft mode, no Zookeeper)
 - Consumer processes messages in real-time
 - Duplicate detection via MongoDB unique indexes
 
@@ -129,26 +104,3 @@ streamlit run dashboard.py
 - Streamlit dashboard provides real-time analytics
 - Metrics: sentiment trends, top posts, subreddit comparisons
 - Interactive filters and time-based analysis
-
-## Automation
-
-GitHub Actions workflows run automatically:
-- **Producer**: Every 15 minutes
-- **Consumer**: Every 30 minutes
-
-Manual triggers available via `workflow_dispatch`
-
-## Troubleshooting
-
-**Reddit API Rate Limits:**
-- Producer implements exponential backoff
-- Reduce subreddit count in config.yaml
-
-**Kafka Connection Issues:**
-- Verify credentials in .env
-- Check Confluent Cloud cluster status
-
-**MongoDB Storage Limits:**
-- Monitor Atlas storage usage
-- Implement TTL indexes for cleanup
-
