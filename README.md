@@ -2,8 +2,9 @@
 Real time sentiment analysis pipeline for Reddit data using Kafka streaming, MongoDB storage, and interactive dashboards.
 
 > **Branch Info:**
-> - `main` - Uses Confluent Cloud (managed Kafka)
+> - `main` - Uses Confluent Cloud (managed Kafka) with GitHub Actions automation
 > - `ApacheKafka` - Uses locally deployed Kafka via Docker
+
 ## Table of Contents
 - [Project Goal](#project-goal)
 - [Architecture](#architecture)
@@ -14,14 +15,13 @@ Real time sentiment analysis pipeline for Reddit data using Kafka streaming, Mon
 - [Methodology](#methodology)
 - [Automation](#automation)
 - [Troubleshooting](#troubleshooting)
-- [Future Enhancements](#future-enhancements)
 
 ## Project Goal
 
 This project builds an end-to-end data pipeline that:
 - Fetches Reddit posts and comments in real-time from multiple subreddits
 - Streams data through Apache Kafka for distributed processing
-- Performs dual sentiment analysis using NLTK VADER and Transformer models
+- Performs sentiment analysis using NLTK VADER
 - Stores processed data in MongoDB with automatic indexing
 - Visualizes trends through an interactive Streamlit dashboard with live search capabilities
 
@@ -33,12 +33,9 @@ This project builds an end-to-end data pipeline that:
 
 No installation required! View real-time Reddit sentiment analysis directly in your browser.
 
-## Requirements
+## Requirements for devs
 
-> **Note:** These requirements are only needed if you want to run the data pipeline locally. The dashboard is publicly accessible via the link above.
-
-### Software
-- Python 3.10+
+### Accounts Required
 - MongoDB Atlas account
 - Confluent Cloud Kafka account
 - Reddit API credentials
@@ -50,22 +47,13 @@ pip install -r requirements.txt
 
 ## Setup Instructions
 
-> **For developers only:** Follow these steps to run the complete pipeline locally.
-
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/Basim592003/Reddit-Trend-Analysis.git
 cd Reddit-Trend-Analysis
 ```
 
-### 2. Create Virtual Environment
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 3. Configure Environment Variables
+### 2. Configure Environment Variables
 Create `.env` file in root directory:
 ```
 REDDIT_CLIENT_ID=your_client_id
@@ -79,8 +67,8 @@ KAFKA_API_SECRET=your_api_secret
 MONGO_CONNECTION_STRING=your_mongo_connection_string
 ```
 
-### 4. Configure Subreddits
-Edit `config.yaml` to specify subreddits to monitor:
+### 3. Configure Subreddits
+Edit `producer/config.yaml` to specify subreddits to monitor:
 ```yaml
 subreddits:
   - technology
@@ -90,22 +78,26 @@ subreddits:
 
 ## Running the Pipeline
 
-**Step 1: Start Producer**
+The pipeline runs automatically via GitHub Actions. For manual execution:
+
+**Start Producer:**
 ```bash
 cd producer
 python reddit_producer.py
 ```
 
-**Step 2: Start Consumer**
+**Start Consumer:**
 ```bash
 cd consumer
 python reddit_consumer.py
 ```
 
-**Step 3: Launch Dashboard Locally**
+**Launch Dashboard:**
 ```bash
+cd dashboard
 streamlit run dashboard.py
 ```
+
 ## Methodology
 
 ### Data Collection
@@ -136,8 +128,8 @@ streamlit run dashboard.py
 ## Automation
 
 GitHub Actions workflows run automatically:
-- **Producer**: Every 15 minutes
-- **Consumer**: Every 30 minutes
+- **Producer**: Every 30 minutes
+- **Consumer**: Every 60 minutes
 
 Manual triggers available via `workflow_dispatch`
 
@@ -153,5 +145,4 @@ Manual triggers available via `workflow_dispatch`
 
 **MongoDB Storage Limits:**
 - Monitor Atlas storage usage
-- Implement TTL indexes for cleanup
-
+- TTL indexes automatically clean up old data
