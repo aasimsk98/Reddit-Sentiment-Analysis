@@ -1,10 +1,6 @@
 # Reddit Trend Analysis (Local Deployment)
 Real-time sentiment analysis pipeline for Reddit data using locally deployed Kafka via Docker, MongoDB storage, and interactive dashboards.
 
-> **Branch Info:**
-> - `main` - Uses Confluent Cloud (managed Kafka)
-> - `ApacheKafka` - Uses locally deployed Kafka via Docker
-
 ## Table of Contents
 - [Project Goal](#project-goal)
 - [Live Dashboard](#live-dashboard)
